@@ -453,22 +453,20 @@ static unsigned int ray_color(const point3 e, double t,
 }
 
 /* @param background_color this is not ambient light */
-void raytracing(uint8_t *pixels, color background_color,
-                rectangular_node rectangulars, sphere_node spheres,
-                light_node lights, const viewpoint *view,
-                int width, int height)
+void raytracing(void *raytracing_p)
 {
     point3 u, v, w, d;
     color object_color = { 0.0, 0.0, 0.0 };
+    raytracing_para *para=raytracing_p;
 
     /* calculate u, v, w */
-    calculateBasisVectors(u, v, w, view);
+    calculateBasisVectors(u, v, w, para->view);
 
     idx_stack stk;
 
     int factor = sqrt(SAMPLES);
-    for (int j = 0; j < height; j++) {
-        for (int i = 0; i < width; i++) {
+    for (int j = para->height_begin; j < para->height_end; j++) {
+        for (int i = para->width_begin; i < para->width_end; i++) {
             double r = 0, g = 0, b = 0;
             /* MSAA */
             for (int s = 0; s < SAMPLES; s++) {
@@ -476,23 +474,24 @@ void raytracing(uint8_t *pixels, color background_color,
                 rayConstruction(d, u, v, w,
                                 i * factor + s / factor,
                                 j * factor + s % factor,
-                                view,
-                                width * factor, height * factor);
-                if (ray_color(view->vrp, 0.0, d, &stk, rectangulars, spheres,
-                              lights, object_color,
+                                para->view,
+                                ROWS * factor, COLS * factor);
+                if (ray_color((para->view)->vrp, 0.0, d, &stk, para->rectangulars, para->spheres,
+                              para->lights, object_color,
                               MAX_REFLECTION_BOUNCES)) {
                     r += object_color[0];
                     g += object_color[1];
                     b += object_color[2];
                 } else {
-                    r += background_color[0];
-                    g += background_color[1];
-                    b += background_color[2];
+                    r += para->background_color[0];
+                    g += para->background_color[1];
+                    b += para->background_color[2];
                 }
-                pixels[((i + (j * width)) * 3) + 0] = r * 255 / SAMPLES;
-                pixels[((i + (j * width)) * 3) + 1] = g * 255 / SAMPLES;
-                pixels[((i + (j * width)) * 3) + 2] = b * 255 / SAMPLES;
+                para->pixels[((i + (j * ROWS)) * 3) + 0] = r * 255 / SAMPLES;
+                para->pixels[((i + (j * ROWS)) * 3) + 1] = g * 255 / SAMPLES;
+                para->pixels[((i + (j * ROWS)) * 3) + 2] = b * 255 / SAMPLES;
             }
         }
     }
+    pthread_exit(0);
 }
