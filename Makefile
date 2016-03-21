@@ -4,15 +4,9 @@ all: $(EXEC)
 
 CC ?= gcc
 CFLAGS = \
-	-std=gnu99 -Wall -O0 -g
+	-std=gnu99 -Wall -O0 -g -lpthread
 LDFLAGS = \
-	-lm
-
-ifeq ($(strip $(THREAD)),1)
-THREAD_FLAGS=-lpthread
-CFLAGS += $(THREAD_FLAGS)
-LDFLAGS += $(THREAD_FLAGS) 
-endif
+	-lm -lpthread
 
 ifeq ($(strip $(PROFILE)),1)
 PROF_FLAGS = -pg

@@ -68,7 +68,7 @@ int main(int argc,char *argv[])
     printf("# Rendering scene\n");
     /* do the ray tracing with the given geometry */
     clock_gettime(CLOCK_REALTIME, &start);
-/*create threads*/
+    /*create threads*/
     for(int i=0; i<P_NUM; ++i) {
         if(pthread_create(&thread[i],NULL,(void *)&raytracing,(void *)(raytracing_arg[i]))) {
             printf("error creating pthread[%d]\n",i);
@@ -91,8 +91,8 @@ int main(int argc,char *argv[])
     delete_sphere_list(&spheres);
     delete_light_list(&lights);
     free(pixels);
-    for(int i=0;i<P_NUM;++i){
-	free(raytracing_arg[i]);
+    for(int i=0; i<P_NUM; ++i) {
+        free(raytracing_arg[i]);
     }
     printf("Done!\n");
     printf("Execution time of raytracing() : %lf sec\n", diff_in_second(start, end));
